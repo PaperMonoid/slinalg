@@ -1,66 +1,61 @@
-(define (v-it f a)
-  (let loop ((i 0))
-    (when (< i (vector-length a))
-      (begin
-	(f i)
-	(loop (1+ i))))))
+(library (slinalg)
+  (export
+   vector-fold-left
+   vector+
+   vector-
+   vector*
+   vector/
+   vector-dot)
+  (import (rnrs))
+
+  (define (for-n f n)
+    (let loop ((i 0))
+      (when (< i n)
+	(begin
+	  (f i)
+	  (loop (+ 1 i))))))
 
 
-(define (v-reduce f a e)
-  (let loop ((i 0)
-	     (r e))
-    (if (< i (vector-length a))
-	(loop (1+ i) (f (vector-ref a i) r))
-	r)))
+  (define (vector-fold-left f id x)
+    (let loop ((i 0) (result id))
+      (if (< i (vector-length x))
+	  (loop (+ 1 i) (f (vector-ref x i) result))
+	  result)))
 
 
-(define (assert-same-length a b)
-  (when (not (= (vector-length a) (vector-length b)))
-    (raise "Vectors must have same length.")))
+  (define (assert-same-length x y)
+    (when (not (= (vector-length x) (vector-length y)))
+      (raise "Vectors must have same length.")))
 
 
-(define (v-map f a)
-  (let ((b (make-vector (vector-length a))))
-    (v-it (lambda (i) (vector-set! b i (f (vector-ref a i)))) a)
-    b))
+  (define (vector-scalar-map f . xs)
+    (fold-left
+     (lambda (x y)
+       (cond
+	((and (number? x) (number? y)) (f x y))
+	((number? y) (vector-map (lambda (z) (f z y)) x))
+	((number? x) (vector-map (lambda (z) (f x z)) y))
+	(else (assert-same-length x y) (vector-map f x y))))
+     (car xs) (cdr xs)))
 
 
-(define (v-pairwise-map f a b)
-  (assert-same-length a b)
-  (let ((c (make-vector (vector-length a))))
-    (v-it (lambda (i) (vector-set! c i (f (vector-ref a i) (vector-ref b i)))) a)
-    c))
+  (define (vector+ . xs)
+    (apply vector-scalar-map + xs))
 
 
-(define (v+ a b)
-  (cond
-   ((number? a) (v-map (lambda (x) (+ a x)) b))
-   ((number? b) (v-map (lambda (x) (+ x b)) a))
-   (else (v-pairwise-map + a b))))
+  (define (vector- . xs)
+    (apply vector-scalar-map - xs))
 
 
-(define (v- a b)
-  (cond
-   ((number? a) (v-map (lambda (x) (- a x)) b))
-   ((number? b) (v-map (lambda (x) (- x b)) a))
-   (else (v-pairwise-map + a b))))
+  (define (vector* . xs)
+    (apply vector-scalar-map * xs))
 
 
-(define (v* a b)
-  (cond
-   ((number? a) (v-map (lambda (x) (* a x)) b))
-   ((number? b) (v-map (lambda (x) (* x b)) a))
-   (else (v-pairwise-map * a b))))
+  (define (vector/ . xs)
+    (apply vector-scalar-map / xs))
 
 
-(define (v/ a b)
-  (cond
-   ((number? a) (v-map (lambda (x) (/ a x)) b))
-   ((number? b) (v-map (lambda (x) (/ x b)) a))
-   (else (v-pairwise-map / a b))))
-
-
-(define (v-dot a b)
-  (assert-same-length a b)
-  (let ((c (v.* a b)))
-    (v-reduce + c 0)))
+  (define (vector-dot x y)
+    (assert-same-length x y)
+    (let ((z (vector* x y)))
+      (vector-fold-left + 0 z))))
