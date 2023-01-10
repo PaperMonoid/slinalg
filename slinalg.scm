@@ -7,7 +7,9 @@
    vector/
    vector-dot
    vector-l1
-   vector-l2)
+   vector-l2
+   vector-dft
+   vector-idft)
   (import (rnrs))
 
   (define (for-n f n)
@@ -41,6 +43,14 @@
      (car xs) (cdr xs)))
 
 
+  (define (vector-zeros n)
+    (make-vector n 0))
+
+
+  (define (vector-ones n)
+    (make-vector n 1))
+
+
   (define (vector+ . xs)
     (apply vector-scalar-map + xs))
 
@@ -62,8 +72,55 @@
     (let ((z (vector* x y)))
       (vector-fold-left + 0 z)))
 
+
   (define (vector-l1 xs)
     (vector-fold-left (lambda (y x) (+ x (abs y))) 0 xs))
 
+
   (define (vector-l2 xs)
-    (expt (vector-fold-left (lambda (y x) (+ x (expt y 2))) 0 xs) 0.5)))
+    (expt (vector-fold-left (lambda (y x) (+ x (expt y 2))) 0 xs) 0.5))
+
+
+  (define pi (* 4 (atan 1)))
+
+
+  (define (vector-dft x)
+    (let* ((N (vector-length x))
+	   (X (vector-zeros N))
+	   (calculation
+	    (lambda (k n)
+	      (* (vector-ref x n) (exp (/ (* -i 2 pi k n) N))))))
+      (let next-term ((k 0))
+	(if (< k N)
+	    (begin
+	      (vector-set!
+	       X
+	       k
+	       (let collect-term
+		   ((k k) (n 0) (result 0))
+		 (if (< n N)
+		     (collect-term k (+ n 1) (+ result (calculation k n)))
+		     result)))
+	      (next-term (+ k 1)))
+	    X))))
+
+
+    (define (vector-idft x)
+    (let* ((N (vector-length x))
+	   (X (vector-zeros N))
+	   (calculation
+	    (lambda (k n)
+	      (* (vector-ref x n) (exp (/ (* 0+i 2 pi k n) N))))))
+      (let next-term ((k 0))
+	(if (< k N)
+	    (begin
+	      (vector-set!
+	       X
+	       k
+	       (let collect-term
+		   ((k k) (n 0) (result 0))
+		 (if (< n N)
+		     (collect-term k (+ n 1) (+ result (calculation k n)))
+		     (/ result N))))
+	      (next-term (+ k 1)))
+	    X)))))
