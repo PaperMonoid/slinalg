@@ -5,7 +5,9 @@
    vector-
    vector*
    vector/
-   vector-dot)
+   vector-dot
+   vector-l1
+   vector-l2)
   (import (rnrs))
 
   (define (for-n f n)
@@ -58,4 +60,10 @@
   (define (vector-dot x y)
     (assert-same-length x y)
     (let ((z (vector* x y)))
-      (vector-fold-left + 0 z))))
+      (vector-fold-left + 0 z)))
+
+  (define (vector-l1 xs)
+    (vector-fold-left (lambda (y x) (+ x (abs y))) 0 xs))
+
+  (define (vector-l2 xs)
+    (expt (vector-fold-left (lambda (y x) (+ x (expt y 2))) 0 xs) 0.5)))
