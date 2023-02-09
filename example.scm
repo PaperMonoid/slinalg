@@ -7,4 +7,3 @@
 (vector-l2 '#(3 4 1))
 
 (vector-idft (vector-dft '#(11 22 3 4)))
-

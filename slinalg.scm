@@ -94,40 +94,38 @@
   (define (vector-dft x)
     (let* ((N (vector-length x))
 	   (X (vector-zeros N))
-	   (calculation
-	    (lambda (k n)
-	      (* (vector-ref x n) (exp (/ (* -i 2 pi k n) N))))))
-      (let next-term ((k 0))
-	(if (< k N)
-	    (begin
-	      (vector-set!
-	       X
-	       k
-	       (let collect-term
-		   ((k k) (n 0) (result 0))
-		 (if (< n N)
-		     (collect-term k (+ n 1) (+ result (calculation k n)))
-		     result)))
-	      (next-term (+ k 1)))
-	    X))))
+	   (W (lambda (k n) (exp (/ (* -i 2 pi k n) N))))
+	   (computation (lambda (k n) (* (vector-ref x n) (W k n)))))
+      (letrec ((sum-computation
+		(lambda (k n result)
+		  (if (< n N)
+		      (sum-computation k (+ n 1) (+ result (computation k n)))
+		      result)))
+	       (next-element
+		(lambda (k)
+		  (if (< k N)
+		      (begin
+			(vector-set! X k (sum-computation k 0 0))
+			(next-element (+ k 1)))
+		      X))))
+	(next-element 0))))
 
 
-    (define (vector-idft x)
+  (define (vector-idft x)
     (let* ((N (vector-length x))
 	   (X (vector-zeros N))
-	   (calculation
-	    (lambda (k n)
-	      (* (vector-ref x n) (exp (/ (* 0+i 2 pi k n) N))))))
-      (let next-term ((k 0))
-	(if (< k N)
-	    (begin
-	      (vector-set!
-	       X
-	       k
-	       (let collect-term
-		   ((k k) (n 0) (result 0))
-		 (if (< n N)
-		     (collect-term k (+ n 1) (+ result (calculation k n)))
-		     (/ result N))))
-	      (next-term (+ k 1)))
-	    X)))))
+	   (W (lambda (k n) (exp (/ (* 0+i 2 pi k n) N))))
+	   (computation (lambda (k n) (* (vector-ref x n) (W k n)))))
+      (letrec ((sum-computation
+		(lambda (k n result)
+		  (if (< n N)
+		      (sum-computation k (+ n 1) (+ result (computation k n)))
+		      result)))
+	       (next-element
+		(lambda (k)
+		  (if (< k N)
+		      (begin
+			(vector-set! X k (sum-computation k 0 0))
+			(next-element (+ k 1)))
+		      X))))
+	(next-element 0)))))
