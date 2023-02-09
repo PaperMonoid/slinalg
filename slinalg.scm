@@ -1,5 +1,8 @@
 (library (slinalg)
   (export
+   vector-zeros
+   vector-ones
+   vector-fill
    vector-fold-left
    vector+
    vector-
@@ -49,6 +52,10 @@
 
   (define (vector-ones n)
     (make-vector n 1))
+
+
+  (define (vector-fill n x)
+    (make-vector n x))
 
 
   (define (vector+ . xs)
