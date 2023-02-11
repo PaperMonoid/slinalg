@@ -12,7 +12,8 @@
    vector-l1
    vector-l2
    vector-dft
-   vector-idft)
+   vector-idft
+   random-lcg)
   (import (rnrs))
 
   (define (for-n f n)
@@ -128,4 +129,11 @@
 			(vector-set! X k (sum-computation k 0 0))
 			(next-element (+ k 1)))
 		      X))))
-	(next-element 0)))))
+	(next-element 0))))
+
+
+  (define (random-lcg xi)
+    (let ((a 1103515245)
+	  (c 12345)
+	  (m (expt 2 31)))
+      (mod (+ (* a xi) c) m))))
