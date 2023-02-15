@@ -8,4 +8,10 @@
 
 (vector-idft (vector-dft '#(11 22 3 4)))
 
-(random-lcg 5)
+(let ((rng (make-rng-normal 1 0.5 0.2)))
+  (display (rng)) (newline)
+  (display (rng)) (newline)
+  (display (rng)) (newline)
+  (display (rng)) (newline)
+  (display (rng)) (newline)
+  (display (rng)) (newline))
