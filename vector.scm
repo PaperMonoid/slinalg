@@ -1,8 +1,10 @@
-(library (slinalg)
+(library (slinalg vector)
   (export
    vector-zeros
    vector-ones
    vector-fill
+   vector-fill-function
+   vector-linspace
    vector-fold-left
    vector+
    vector-
@@ -12,9 +14,7 @@
    vector-l1
    vector-l2
    vector-dft
-   vector-idft
-   make-rng-uniform
-   make-rng-normal)
+   vector-idft)
   (import (rnrs))
 
   (define (for-n f n)
@@ -58,6 +58,21 @@
 
   (define (vector-fill n x)
     (make-vector n x))
+
+
+  (define (vector-fill-function n f)
+    (let ((v (vector-zeros n)))
+      (begin
+	(for-n (lambda (i) (vector-set! v i (f))) n))
+      v))
+
+
+  (define (vector-linspace start stop n)
+    (let ((v (vector-zeros n))
+	  (step (inexact (/ (- stop start) n))))
+      (begin
+	(for-n (lambda (i) (vector-set! v i (* i step))) n)
+	v)))
 
 
   (define (vector+ . xs)
@@ -130,32 +145,4 @@
 			(vector-set! X k (sum-computation k 0 0))
 			(next-element (+ k 1)))
 		      X))))
-	(next-element 0))))
-
-
-  (define (make-rng-uniform seed)
-    (let ((a 25214903917)
-	  (c 11)
-	  (m (expt 2 48))
-	  (x seed))
-      (lambda ()
-	(begin
-	  (set! x (mod (+ (* a x) c) m))
-	  (inexact (/ x m))))))
-
-
-  (define (box-muller-transform mu sigma u1 u2)
-    (let ((magnitude (* sigma (sqrt (* -2 (log u1))))))
-      (list
-       (+ (* magnitude (cos (* 2 pi u2))) mu)
-       (+ (* magnitude (sin (* 2 pi u2))) mu))))
-
-
-  (define (make-rng-normal seed mu sigma)
-    (let ((rng (make-rng-uniform seed)) (z '()))
-      (lambda ()
-	(begin
-	  (when (null? z)
-	    (set! z (box-muller-transform mu sigma (rng) (rng))))
-	  (let ((z0 (car z)) (z1 (cdr z)))
-	    (begin (set! z z1) z0)))))))
+	(next-element 0)))))
