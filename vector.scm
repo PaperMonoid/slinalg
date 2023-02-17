@@ -6,10 +6,25 @@
    vector-fill-function
    vector-linspace
    vector-fold-left
+   vector-min
+   vector-max
+   vector-sum
+   vector-product
+   vector-mean
+   vector-std
    vector+
    vector-
    vector*
    vector/
+   vector-expt
+   vector-exp
+   vector-log
+   vector-sin
+   vector-asin
+   vector-cos
+   vector-acos
+   vector-tan
+   vector-atan
    vector-dot
    vector-l1
    vector-l2
@@ -91,6 +106,42 @@
     (apply vector-scalar-map / xs))
 
 
+  (define (vector-expt x y)
+    (vector-scalar-map (lambda (xi yi) (expt xi yi)) x y))
+
+
+  (define (vector-exp x)
+    (vector-map exp x))
+
+
+  (define (vector-log x)
+    (vector-map log x))
+
+
+  (define (vector-sin x)
+    (vector-map sin x))
+
+
+  (define (vector-asin x)
+    (vector-map asin x))
+
+
+  (define (vector-cos x)
+    (vector-map cos x))
+
+
+  (define (vector-acos x)
+    (vector-map acos x))
+
+
+  (define (vector-tan x)
+    (vector-map tan x))
+
+
+  (define (vector-atan x)
+    (vector-map atan x))
+
+
   (define (vector-dot x y)
     (assert-same-length x y)
     (let ((z (vector* x y)))
@@ -103,6 +154,33 @@
 
   (define (vector-l2 xs)
     (expt (vector-fold-left (lambda (y x) (+ x (expt y 2))) 0 xs) 0.5))
+
+
+  (define (vector-min x)
+    (vector-fold-left min +inf.0 x))
+
+
+  (define (vector-max x)
+    (vector-fold-left max -inf.0 x))
+
+
+  (define (vector-sum x)
+    (vector-fold-left + 0 x))
+
+
+  (define (vector-product x)
+    (vector-fold-left * 1 x))
+
+
+  (define (vector-mean x)
+    (/ (vector-sum x) (vector-length x)))
+
+
+  (define (vector-std x)
+    (let ((mean (vector-mean)))
+      (/
+       (vector-sum (vector-map (lambda (xi) (expt (- xi mean) 2)) x))
+       (- (vector-length x) 1))))
 
 
   (define pi (* 4 (atan 1)))
